@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<title>JS / AJAX</title>
+		<link href="//cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+		<link href="styles/styles.less" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+		<div class="mui-container">
+			<form id="newsForm" class="mui-form">
+				<legend>Поиск новостей</legend>
+				<datalist id="suggestList"></datalist>
+				<div class="mui-textfield mui-textfield--float-label">
+					<input
+						type="text"
+						id="input"
+						list="suggestList"
+					/>
+					<label>введите ключевое слово/слова</label>
+				</div>
+				<button
+					type="submit"
+					id="search"
+					class="mui-btn mui-btn--primary"
+				>
+					Search
+				</button>
+				<button
+					type="button"
+					id="reset"
+					class="mui-btn mui-btn--primary"
+				>
+					reset
+				</button>
+			</form>
+			
+			<div id="output" class="mui--text-body1"></div>
+		</div>
+		<script src="//cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+		<script src="./js/index.js"></script>
+	</body>
+</html>

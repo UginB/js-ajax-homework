@@ -127,7 +127,11 @@ document.addEventListener("DOMContentLoaded", () => {
         output.textContent = `loading error ${e.message}`;
       }
 
-      refreshSagAndReq();
+      try {
+        refreshSagAndReq();
+      } catch (e) {
+        throw new Error(e.message);
+      }
     } else {
       input.style.backgroundColor = "red";
       output.textContent = "введите какое-нибудь слово!";
@@ -135,6 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("storage", () => {
-    refreshSagAndReq();
+    try {
+      refreshSagAndReq();
+    } catch (e) {
+      throw new Error(e.message);
+    }
   });
 });

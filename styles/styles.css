@@ -1,0 +1,14 @@
+.wrapper {
+	display: flex;
+}
+
+.oldRequests {
+	display: block;
+	width: 30%;
+	height: 100px;
+}
+
+#newsForm {
+	width: 70%;
+	padding-top: 25px;
+}

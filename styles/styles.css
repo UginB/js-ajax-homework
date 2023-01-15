@@ -8,7 +8,40 @@
 	height: 100px;
 }
 
+.oldRequests__item {
+	cursor: pointer;
+}
+
+.oldRequests__item:hover {
+	text-decoration: underline;
+}
+
 #newsForm {
 	width: 70%;
 	padding-top: 25px;
+}
+
+.suggest {
+	margin-top: 15px;
+	display: none;
+}
+
+.saggest__item {
+	cursor: pointer;
+}
+
+.saggest__item:hover {
+	text-decoration: underline;
+}
+
+.visited {
+	color: blueviolet;
+}
+
+.show {
+	display: block;
+}
+
+.hide {
+	display: none;
 }

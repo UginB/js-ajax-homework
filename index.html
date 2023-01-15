@@ -9,15 +9,14 @@
 		<div class="mui-container">
 			<div class="wrapper">
 				<form id="newsForm" class="mui-form">
-					<legend>Найди шутку по слову</legend>
-					<datalist id="suggestList"></datalist>
+					<legend>Поиск новостей (вводить можно по-русски, но лучше использовать английский)</legend>
 					<div class="mui-textfield mui-textfield--float-label">
 						<input
 							type="text"
 							id="input"
-							list="suggestList"
+							placeholder="введите ключевое слово"
 						/>
-						<label>введите ключевое слово</label>
+						<ul class="suggest"></ul>
 					</div>
 					<button
 						type="submit"

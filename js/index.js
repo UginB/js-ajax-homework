@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const _apiBase = "https://v2.jokeapi.dev/";
+  const _apiBase = "https://api.nytimes.com/svc/";
+  const _apiKey = "api-key=v4kDqrpaGUclSouAkG457SGtvpsry2Ri";
 
   async function getData(url) {
     const response = await fetch(url, {
@@ -12,87 +13,120 @@ document.addEventListener("DOMContentLoaded", () => {
     return response.json();
   }
 
-  const getSearchRequest = async (word) => {
-    const res = await getData(`${_apiBase}joke/Any?contains=${word}`);
+  const getSearchRequest = async (value) => {
+    const res = await getData(
+      `${_apiBase}search/v2/articlesearch.json?q=${value}&${_apiKey}`
+    );
 
-    if (res.joke) {
-      return res.joke;
-    } else if (res.message) {
-      return res.message;
-    } else {
-      return `${res.setup} ${res.delivery}`;
-    }
+    return res.response.docs;
   };
 
-  async function loadJokesCategories() {
-    const data = await getData(`${_apiBase}categories`);
-    return data.categories;
+  async function loadSaggests() {
+    const data = await getData(
+      `${_apiBase}topstories/v2/world.json?${_apiKey}`
+    );
+
+    let saggArr = [];
+    for (let i = 0; i < 5; i++) {
+      saggArr.push(data.results[i].title);
+    }
+    return saggArr;
   }
 
   function refreshSaggestWords(arr) {
     suggest.innerHTML = "";
     arr.forEach((item) => {
-      const option = document.createElement("option");
-      option.value = item;
+      const option = document.createElement("li");
+      option.textContent = item;
       suggest.appendChild(option);
+      option.classList.add("saggest__item");
+      if (JSON.parse(localStorage.getItem("searchValue")).includes(item)) {
+        option.classList.add("visited");
+      }
+      option.addEventListener("click", () => {
+        input.value = item;
+        suggest.classList.remove("show");
+        suggest.classList.add("hide");
+      });
+    });
+  }
+
+  function createTextElemLi(parentElem, innerText, ...classes) {
+    const option = document.createElement("li");
+    option.textContent = innerText;
+    parentElem.appendChild(option);
+    option.classList.add(...classes);
+    option.addEventListener("click", () => {
+      input.value = innerText;
     });
   }
 
   function refreshOldRequests(arr) {
     oldRequests.innerHTML = "";
-    for (let i = 0; i < 3; i++) {
-      const el = document.createElement("li");
-      el.style.listStyleType = "none";
-      el.textContent = arr[i];
-      oldRequests.appendChild(el);
+    if (arr.length < 3) {
+      arr.forEach((item) => {
+        createTextElemLi(oldRequests, item, "oldRequests__item");
+      });
+    } else {
+      for (let i = 0; i < 3; i++) {
+        createTextElemLi(oldRequests, arr[i], "oldRequests__item");
+      }
     }
   }
 
   function refreshSagAndReq() {
-    let oldReqArr = [];
-    let lSArr = JSON.parse(localStorage.getItem("searchValue"));
-    if (lSArr.length > 5) {
-      for (let i = 0; i < 5; i++) {
-        oldReqArr.push(lSArr[i]);
+    let history = JSON.parse(localStorage.getItem("searchValue"));
+    let filteredHistory = [];
+
+    if (history.length > 5) {
+      for (let i = 0; i < 12; i++) {
+        if (!saggestFromAPI.includes(history[i]) && history[i]) {
+          filteredHistory.push(history[i]);
+        }
+
+        if (filteredHistory.length === 5) break;
       }
     } else {
-      oldReqArr = [...lSArr];
+      filteredHistory = [...history];
     }
-    refreshSaggestWords([...new Set([...oldReqArr, ...storageArch])]);
-    refreshOldRequests([
-      ...new Set([...JSON.parse(localStorage.getItem("searchValue"))]),
-    ]);
+    refreshSaggestWords([...new Set([...filteredHistory, ...saggestFromAPI])]);
+    refreshOldRequests(history);
   }
 
   const form = document.querySelector("#newsForm");
   const input = document.querySelector("#input");
-  const suggest = document.querySelector("#suggestList");
+  const suggest = document.querySelector(".suggest");
   const output = document.querySelector("#output");
   const reset = document.querySelector("#reset");
   const oldRequests = document.querySelector(".oldRequests__list");
-  let storageArch = [];
+  let saggestFromAPI = [];
 
-  output.textContent = "Loading…";
-  try {
-    loadJokesCategories()
-      .then((data) => {
-        data.forEach((cat) => {
-          if (cat !== "Misc" && cat !== "Spooky") {
-            // ДА! это костыль, я не смог найти подходящий АПИ, который нормально давал бы саджесты, эти два слова ничего не выведут в output
-            storageArch.push(cat);
-            output.textContent = "";
-          }
-        });
-        refreshSaggestWords(storageArch);
-      })
-      .catch((e) => {
-        output.textContent = `loading error ${e.message}`;
+  output.textContent = "Загрузка…";
+
+  loadSaggests()
+    .then((data) => {
+      data.forEach((sag) => {
+        saggestFromAPI.push(sag);
+        output.textContent = "";
       });
-  } catch (e) {
-    output.textContent = `loading error ${e.message}`;
-  }
+      refreshSagAndReq();
+    })
+    .catch((e) => {
+      output.textContent = `loading error: ${e.message}`;
+    });
 
-  localStorage.setItem("searchValue", "[]");
+  refreshOldRequests([
+    ...new Set([...JSON.parse(localStorage.getItem("searchValue"))]),
+  ]);
+
+  try {
+    if (!localStorage.getItem("searchValue")) {
+      localStorage.setItem("searchValue", "[]");
+    }
+  } catch (e) {
+    output.textContent = "Ошибка localStorage";
+    throw new Error(e.message);
+  }
 
   reset.addEventListener("click", () => {
     input.value = "";
@@ -100,49 +134,97 @@ document.addEventListener("DOMContentLoaded", () => {
     input.style.backgroundColor = "";
   });
 
+  form.parentElement.addEventListener("click", (e) => {
+    if (e.target === input) {
+      suggest.classList.add("show");
+      suggest.classList.remove("hide");
+    } else {
+      suggest.classList.remove("show");
+      suggest.classList.add("hide");
+    }
+  });
+
+  input.addEventListener("input", (e) => {
+    let saggestArr = [
+      ...new Set([
+        ...JSON.parse(localStorage.getItem("searchValue")),
+        ...saggestFromAPI,
+      ]),
+    ];
+
+    let newSaggestArr = saggestArr.filter((item) =>
+      item.toLowerCase().startsWith(e.target.value.toLowerCase())
+    );
+
+    let res = [];
+    for (let i = 0; i < 10; i++) {
+      if (newSaggestArr[i]) {
+        res.push(newSaggestArr[i]);
+      }
+    }
+
+    refreshSaggestWords(res);
+
+    if (!input.value) {
+      refreshSagAndReq();
+    }
+  });
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     if (input.value) {
-      output.textContent = "";
+      output.textContent = "Ищем новости... Подождите, пожалуйста";
       input.style.backgroundColor = "";
 
       let memoryArr = JSON.parse(localStorage.getItem("searchValue"));
-      let newMemoryArr = JSON.stringify([input.value, ...memoryArr]);
-      localStorage.setItem("searchValue", newMemoryArr);
+
+      let newMemoryArr = [];
+      if (memoryArr.length > 10) {
+        let arrNews = [];
+        for (let i = 0; i < 10; i++) {
+          arrNews.push(memoryArr[i]);
+        }
+        newMemoryArr = JSON.stringify([...new Set([input.value, ...arrNews])]);
+      } else {
+        newMemoryArr = JSON.stringify([
+          ...new Set([input.value, ...memoryArr]),
+        ]);
+      }
+
+      try {
+        window.localStorage.setItem("searchValue", newMemoryArr);
+      } catch (e) {
+        output.textContent = "Ошибка localStorage";
+        throw new Error(e.message);
+      }
 
       let text = "";
 
-      try {
-        getSearchRequest(input.value)
-          .then((joke) => {
-            text += `<li class="output__item">${joke}</li>`;
+      getSearchRequest(input.value)
+        .then((news) => {
+          if (news.length) {
+            news.forEach((item) => {
+              text += `<li class="output__item"><a href=${
+                item.web_url
+              }>${item.abstract.substring(0, 100)}...</a></li>`;
+            });
+          } else {
+            text = "По данному запросу информация не найдена";
+          }
 
-            output.innerHTML = text;
-          })
-          .catch((e) => {
-            output.textContent = `loading error ${e.message}`;
-          });
-      } catch (e) {
-        output.textContent = `loading error ${e.message}`;
-      }
+          output.innerHTML = text;
+        })
+        .catch((e) => {
+          output.textContent = `loading error: ${e.message}`;
+        });
 
-      try {
-        refreshSagAndReq();
-      } catch (e) {
-        throw new Error(e.message);
-      }
+      refreshSagAndReq();
     } else {
       input.style.backgroundColor = "red";
       output.textContent = "введите какое-нибудь слово!";
     }
   });
 
-  window.addEventListener("storage", () => {
-    try {
-      refreshSagAndReq();
-    } catch (e) {
-      throw new Error(e.message);
-    }
-  });
+  window.addEventListener("storage", refreshSagAndReq);
 });

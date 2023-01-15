@@ -180,17 +180,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let memoryArr = JSON.parse(localStorage.getItem("searchValue"));
 
       let newMemoryArr = [];
-      if (memoryArr.length > 10) {
-        let arrNews = [];
-        for (let i = 0; i < 10; i++) {
-          arrNews.push(memoryArr[i]);
-        }
-        newMemoryArr = JSON.stringify([...new Set([input.value, ...arrNews])]);
-      } else {
-        newMemoryArr = JSON.stringify([
-          ...new Set([input.value, ...memoryArr]),
-        ]);
-      }
+
+      newMemoryArr = JSON.stringify([...new Set([input.value, ...memoryArr])]);
 
       try {
         window.localStorage.setItem("searchValue", newMemoryArr);

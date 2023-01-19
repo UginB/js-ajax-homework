@@ -103,6 +103,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   output.textContent = "Загрузка…";
 
+  try {
+    if (!localStorage.getItem("searchValue")) {
+      localStorage.setItem("searchValue", "[]");
+    }
+  } catch (e) {
+    output.textContent = "Ошибка localStorage";
+    throw new Error(e.message);
+  }
+
   loadSaggests()
     .then((data) => {
       data.forEach((sag) => {
@@ -118,15 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshOldRequests([
     ...new Set([...JSON.parse(localStorage.getItem("searchValue"))]),
   ]);
-
-  try {
-    if (!localStorage.getItem("searchValue")) {
-      localStorage.setItem("searchValue", "[]");
-    }
-  } catch (e) {
-    output.textContent = "Ошибка localStorage";
-    throw new Error(e.message);
-  }
 
   reset.addEventListener("click", () => {
     input.value = "";

@@ -3,36 +3,41 @@
 	<head>
 		<title>JS / AJAX</title>
 		<link href="//cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
-		<link href="styles/styles.less" rel="stylesheet" type="text/css" />
+		<link href="styles/styles.css" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
 		<div class="mui-container">
-			<form id="newsForm" class="mui-form">
-				<legend>Поиск новостей</legend>
-				<datalist id="suggestList"></datalist>
-				<div class="mui-textfield mui-textfield--float-label">
-					<input
-						type="text"
-						id="input"
-						list="suggestList"
-					/>
-					<label>введите ключевое слово/слова</label>
+			<div class="wrapper">
+				<form id="newsForm" class="mui-form">
+					<legend>Поиск новостей (вводить можно по-русски, но лучше использовать английский)</legend>
+					<div class="mui-textfield mui-textfield--float-label">
+						<input
+							type="text"
+							id="input"
+							placeholder="введите ключевое слово"
+						/>
+						<ul class="suggest"></ul>
+					</div>
+					<button
+						type="submit"
+						id="search"
+						class="mui-btn mui-btn--primary"
+					>
+						Search
+					</button>
+					<button
+						type="button"
+						id="reset"
+						class="mui-btn mui-btn--primary"
+					>
+						reset
+					</button>
+				</form>
+				<div class="oldRequests">
+					<h2 class="title">Прошлые поиски:</h2>
+					<ul class="oldRequests__list"></ul>
 				</div>
-				<button
-					type="submit"
-					id="search"
-					class="mui-btn mui-btn--primary"
-				>
-					Search
-				</button>
-				<button
-					type="button"
-					id="reset"
-					class="mui-btn mui-btn--primary"
-				>
-					reset
-				</button>
-			</form>
+			</div>
 			
 			<div id="output" class="mui--text-body1"></div>
 		</div>
